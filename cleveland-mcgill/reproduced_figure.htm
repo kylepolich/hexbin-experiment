@@ -1,0 +1,213 @@
+<html>
+<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.14/d3.min.js"></script>
+</head>
+<body>
+<style>
+.axis path, .axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+#tooltip {
+    position: absolute;
+    text-align: center;
+    width: 40px;
+    height: auto;
+    padding: 10px;
+    background-color: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+#tooltip.hidden {
+    display: none;
+}
+#tooltip p {
+    margin: 0;
+    font-family: sans-serif;
+    font-size: 16px;
+    line-height: 20px;
+}
+</style>
+<script>
+var data = {
+				"Groups" : [
+					{"name": "1", "data": {"A":  9, "B":  8, "C": 5}}
+				,	{"name": "2", "data": {"A":  7, "B": 13, "C": 8}}
+				,	{"name": "3", "data": {"A": 11, "B":  8, "C": 7}}
+				]
+			}
+
+var margins = {
+    top: 20,
+    left: 48,
+    right: 24,
+    bottom: 40
+}
+width = 400 - margins.left - margins.right
+height = 400 - margins.top - margins.bottom
+
+dataset = []
+groupcount = data["Groups"].length
+serieses = Object.keys(data["Groups"][0]["data"])
+for (var i=0; i < serieses.length; i++) {
+	seriesName = serieses[i]
+	dlist = []
+	for (var j=0; j < data["Groups"].length; j++) {
+		group = data["Groups"][j]
+		dlist.push({"group": group["name"], "count": group["data"][seriesName]})
+	}
+	var g = {"data": dlist, "name": seriesName}
+	dataset.push(g)
+}
+
+series = dataset.map(function (d) {
+    return d.name;
+})
+
+dataset = dataset.map(function (d) {
+    return d.data.map(function (o, i) {
+        return {
+            y: o.count,
+            x: o.group
+        };
+    });
+})
+
+stack = d3.layout.stack()
+stack(dataset);
+
+var dataset = dataset.map(function (group) {
+    return group.map(function (d) {
+        return {
+            x: d.y,
+            y: d.x,
+            x0: d.y0
+        };
+    });
+})
+
+svg = d3.select('body')
+    .append('svg')
+    .attr('width', width + margins.left + margins.right)
+    .attr('height', height + margins.top + margins.bottom)
+    .append('g')
+    .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')')
+
+xMax = 30
+
+xScale = d3.scale.linear()
+    .domain([0, xMax])
+    .range([0, width])
+
+groups = dataset[0].map(function (d) {
+    return d.y;
+})
+console.log(groups)
+
+yScale = d3.scale.ordinal()
+    .domain(groups)
+    .rangeRoundBands([0, height], .5)
+
+yAxis = d3.svg.axis()
+    .scale(yScale)
+    .orient('left')
+colours = d3.scale.category10()
+
+groups = svg.selectAll('g')
+    .data(dataset)
+    .enter()
+    .append('g')
+    .style('fill', function (d, i) {
+    return colours(i);
+})
+
+rects = groups.selectAll('rect')
+	.data(function (d) {
+	    return d;
+	})
+    .enter()
+    .append('rect')
+    .attr('x', function (d) {
+	    return xScale(d.x0);
+	})
+    .attr('y', function (d, i) {
+    	console.log(d.y, yScale(d.y))
+    	y = yScale(d.y)
+    	return y;
+	})
+	.attr('height', function (d) {
+		return 40;
+	})
+    .attr('width', function (d) {
+    	return xScale(d.x);
+	})
+    .on('mouseover', function (d) {
+    	var xPos = parseFloat(d3.select(this).attr('x')) / 2 + width / 2
+    	var yPos = parseFloat(d3.select(this).attr('y')) + yScale.rangeBand() / 2
+	    d3.select('#tooltip')
+	        .style('left', xPos + 'px')
+	        .style('top', yPos + 'px')
+	        .select('#value')
+	        .text(d.x);
+	    d3.select('#tooltip').classed('hidden', false);
+	})
+    .on('mouseout', function () {
+	    d3.select('#tooltip').classed('hidden', true);
+	})
+
+svg.append("text")      // text label for the x axis
+        .attr("x", width/2 )
+        .attr("y",  height + 40 )
+        .style("text-anchor", "middle")
+        .text("Value");
+
+svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margins.left )
+        .attr("x",0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Group");
+
+
+xAxis = d3.svg.axis()
+    .scale(xScale)
+    .orient('bottom')
+    .tickValues(d3.range(00, 31, 10));
+xAxis2 = d3.svg.axis()
+    .scale(xScale)
+    .orient('top')
+    .tickValues(d3.range(00, 31, 10));
+svg.append('g')
+        .attr('class', 'axis')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(xAxis);
+svg.append('g')
+        .attr('class', 'axis')
+        .call(xAxis2);
+
+svg.append('g')
+    .attr('class', 'axis')
+    .call(yAxis);
+
+
+</script>
+
+<div id="tooltip" class="hidden">
+    <p><span id="value">100</span>
+    </p>
+</div>
+
+<img src="orig.png" />
+</body>
+</html>
