@@ -1,0 +1,73 @@
+\documentclass[journal]{vgtc}
+
+\ifpdf%                                % if we use pdflatex
+  \pdfoutput=1\relax                   % create PDFs from pdfLaTeX
+  \pdfcompresslevel=9                  % PDF Compression
+  \pdfoptionpdfminorversion=7          % create PDF 1.7
+  \ExecuteOptions{pdftex}
+  \usepackage{graphicx}                % allow us to embed graphics files
+  \DeclareGraphicsExtensions{.pdf,.png,.jpg,.jpeg} % for pdflatex we expect .pdf, .png, or .jpg files
+\else%                                 % else we use pure latex
+  \ExecuteOptions{dvips}
+  \usepackage{graphicx}                % allow us to embed graphics files
+  \DeclareGraphicsExtensions{.eps}     % for pure latex we expect eps files
+\fi%
+
+%% it is recomended to use ``\autoref{sec:bla}'' instead of ``Fig.~\ref{sec:bla}''
+\graphicspath{{figures/}{pictures/}{images/}{./}} % where to search for the images
+
+\usepackage{microtype}                 % use micro-typography (slightly more compact, better to read)
+\PassOptionsToPackage{warn}{textcomp}  % to address font issues with \textrightarrow
+\usepackage{textcomp}                  % use better special symbols
+\usepackage{mathptmx}                  % use matching math font
+\usepackage{times}                     % we use Times as the main font
+\renewcommand*\ttdefault{txtt}         % a nicer typewriter font
+\usepackage{cite}
+
+%\onlineid{0}
+
+%% declare the category of your paper, only shown in review mode
+\vgtccategory{Research}
+
+\title{Graphical Comprehension}
+
+\author{Kyle Polich and Guo Lin}
+\authorfooter{
+\item
+ Kyle Polich is with DataScience. E-mail: kyle@datascience.com.
+\item
+ Guo Lin is with DataScience.  E-mail: guo@datascience.com.
+}
+
+\abstract{When presenting data visually, one has many choices in established chart types
+to choose from.  The objective of a data visualization should be to convey information
+effectively and correctly to the reader.  We empirically measure the comprehension achieved
+by readers when presented the same data in two different chart types. a typical scatterplot
+and a hexbin plot.
+}
+\keywords{visualization, hexbin, scatterplot. comprehension}
+
+\vgtcinsertpkg
+
+\begin{document}
+
+\SweaveOpts{concordance=TRUE}
+
+\firstsection{Introduction}
+
+\maketitle
+
+The
+
+
+
+Test \cite{cleveland1984graphical}
+\cite{heer2010crowdsourcing}
+
+
+
+\acknowledgments{The authors wish to thank the DataScience leadership for their support in this research.}
+
+\bibliographystyle{abbrv-doi}
+\bibliography{references}
+\end{document}
