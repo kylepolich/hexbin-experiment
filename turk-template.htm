@@ -1,0 +1,158 @@
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://s3.amazonaws.com/dataskeptic/d3.hexbin.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+
+<!-- Bootstrap v3.0.3 -->
+<link href="https://s3.amazonaws.com/mturk-public/bs30/css/bootstrap.min.css" rel="stylesheet" />
+
+<section class="container" id="Survey" style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
+<div class="row col-xs-12 col-md-12"><!-- Instructions -->
+<div class="panel panel-primary">
+<div class="panel-heading"><strong>Instructions</strong></div>
+
+
+
+<style>
+.axis text {
+  font: 10px sans-serif;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+.hexagon {
+  fill: none;
+  stroke: #000;
+  stroke-width: .5px;
+}
+</style>
+
+    <div id='hex'></div>
+    <div id='scatter'></div>
+
+<script>
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+var randomX = d3.random.normal(width / 2, 80),
+    randomY = d3.random.normal(height / 2, 80),
+    points = d3.range(2000).map(function() { return [randomX(), randomY()]; });
+var color = d3.scale.linear()
+    .domain([0, 20])
+    .range(["white", "steelblue"])
+    .interpolate(d3.interpolateLab);
+var hexbin = d3.hexbin()
+    .size([width, height])
+    .radius(20);
+var x = d3.scale.identity()
+    .domain([0, width]);
+var y = d3.scale.linear()
+    .domain([0, height])
+    .range([height, 0]);
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+    .tickSize(6, -height);
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickSize(6, -width);
+var svg = d3.select("#hex").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+svg.append("clipPath")
+    .attr("id", "clip")
+  .append("rect")
+    .attr("class", "mesh")
+    .attr("width", width)
+    .attr("height", height);
+svg.append("g")
+    .attr("clip-path", "url(#clip)")
+  .selectAll(".hexagon")
+    .data(hexbin(points))
+  .enter().append("path")
+    .attr("class", "hexagon")
+    .attr("d", hexbin.hexagon())
+    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .style("fill", function(d) { return color(d.length); });
+svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis);
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+    
+    
+    
+var svg = d3.select("#scatter").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+svg.append("clipPath")
+    .attr("id", "clip")
+  .append("rect")
+    .attr("class", "mesh")
+    .attr("width", width)
+    .attr("height", height);
+svg.append("g")
+  .selectAll(".hexagon")
+    .data(points)
+  .enter().append("circle")
+    .attr("r", 3)
+    .attr("cx", function(d) {return d[0]})
+    .attr("cy", function(d) {return d[1]})
+    .style("fill", function(d) { return "rgba(0,0,0,.1)"; });
+svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis);
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+</script>
+
+
+
+
+
+</div>
+<!-- End Instructions --><!-- Survey Body -->
+
+<section>
+<fieldset>
+<p>&nbsp;</p>
+
+<p><label>1. What is your gender? </label></p>
+
+<div class="radio"><label><input name="Gender" type="radio" value="Male" />Male </label></div>
+
+<div class="radio"><label><input name="Gender" type="radio" value="Female" />Female </label></div>
+</fieldset>
+
+<fieldset>
+<div class="input-group"><label>2. What is your age?</label> <input class="form-control" name="Age" size="120" type="text" /></div>
+</fieldset>
+
+<fieldset><label>3. Which of the following best describes your highest achieved education level? </label> <select class="form-control" name="Education"><option selected="selected" value="select one">- select one -</option><option value="Some High School">Some High School</option><option value="Some college, no degree">Some college, no degree</option><option value="Associates degree">Associates degree</option><option value="Bachelors degree">Bachelors degree</option><option value="Graduate degree (Masters, Doctorate, etc.)">Graduate degree (Masters, Doctorate, etc.)</option> </select></fieldset>
+
+<fieldset><label>4. What is the total income of your household? </label> <select class="form-control" name="HouseHoldIncome" size="5"><option>Less than $12,500</option><option>$12,500 - $24,999</option><option>$25,000 - $37,499</option><option>$37,500 - $49,999</option><option>$50,000 - $62,499</option><option>$62,500 - $74,999</option><option>$75,000 - $87,499</option><option>$87,500 - $99,999</option><option>$100,000 or more</option> </select></fieldset>
+
+
+</section>
+<!-- End Survey Body --></div>
+</section>
+<!-- close container -->
+<style type="text/css">fieldset {
+    padding: 10px;
+    background:#fbfbfb;
+    border-radius:5px;
+    margin-bottom:5px;
+}
+</style>
+
