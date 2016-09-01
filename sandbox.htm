@@ -22,7 +22,7 @@
   stroke-width: .5px;
 }
 
-.sliders {
+.slider-container {
   margin: 10px;
   display: inline-block;
   width: 200px;
@@ -37,23 +37,19 @@
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="nouislider.min.js"></script>
 
-<div class='sliders'>
-  <div id='nSlider'></div>
-  <div id='nSlider-value'></div>
-</div>
+<body>
+  <div id='sliders'>
+  <p>
+  n: total number of pionts;<br />
+  rad: radius in hexbin plot;<br />
+  binMax: max number of points in hexbin color map;<br />
+  alpah: alpha in scatter plot. <br />
+  </p>
+  </div>
 
-<div class='sliders'>
-  <div id='radSlider'></div>
-  <div id='radSlider-value'></div>
-</div>
-
-<div class='sliders'>
-  <div id='alphaSlider'></div>
-  <div id='alphaSlider-value'></div>
-</div>
-
-<div id='hex'></div>
-<div id='scatter'></div>
+  <div id='hex'></div>
+  <div id='scatter'></div>
+</body>
 
 <script>
 
@@ -62,49 +58,43 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
-nSlider = document.getElementById('nSlider')
-noUiSlider.create(nSlider, {
-    start: [2000],
-    range: {
-      'min': [100],
-      'max': [10000]
-    }
+function slider(name, start, min, max) {
+  var element = document.createElement('div');
+  element.id = name + 'Slider';
+
+  noUiSlider.create(element, {
+      start: [start],
+      range: {
+        'min': [min],
+        'max': [max]
+      }
+    });
+  element.noUiSlider.on('slide', update);
+
+  var valueElem = document.createElement('div');
+  valueElem.id = name + 'Slider-value';
+
+  element.noUiSlider.on('update', function( values, handle ) {
+    valueElem.innerHTML = name + ': ' + values[handle];
   });
-nSlider.noUiSlider.on('slide', update);
-var nSliderValueElement = document.getElementById('nSlider-value');
-nSlider.noUiSlider.on('update', function( values, handle ) {
-  nSliderValueElement.innerHTML = 'n: '+values[handle];
-});
 
+  var sliderContainer = document.createElement('div');
+  sliderContainer.className = 'slider-container';
+  sliderContainer.appendChild(element);
+  sliderContainer.appendChild(valueElem);
 
-radSlider = document.getElementById('radSlider')
-noUiSlider.create(radSlider, {
-    start: [20],
-    range: {
-      'min': [2],
-      'max': [100]
-    }
-  });
-radSlider.noUiSlider.on('slide', update);
-var radSliderValueElement = document.getElementById('radSlider-value');
-radSlider.noUiSlider.on('update', function( values, handle ) {
-  radSliderValueElement.innerHTML = 'radius: '+values[handle];
-});
+  document.getElementById('sliders').appendChild(sliderContainer);
 
+  return element;
+}
 
-alphaSlider = document.getElementById('alphaSlider')
-noUiSlider.create(alphaSlider, {
-    start: [.1],
-    range: {
-      'min': [.01],
-      'max': [.5]
-    }
-  });
-alphaSlider.noUiSlider.on('slide', update);
-var alphaSliderValueElement = document.getElementById('alphaSlider-value');
-alphaSlider.noUiSlider.on('update', function( values, handle ) {
-  alphaSliderValueElement.innerHTML = 'alpha: '+values[handle];
-});
+nSlider = slider('n', 2000, 100, 10000);
+
+radSlider = slider('rad', 20, 2, 100);
+binMaxSlider = slider('binMax', 20, 5, 100)
+
+alphaSlider = slider('alpha', .1, .01, .5)
+
 
 function update() {
 
@@ -113,20 +103,28 @@ function update() {
 
   var n = nSlider.noUiSlider.get(),
       rad = radSlider.noUiSlider.get(),
-      alpha = alphaSlider.noUiSlider.get();
+      alpha = alphaSlider.noUiSlider.get()
+      binMax = binMaxSlider.noUiSlider.get();
 
-  var randomX = d3.random.normal(width / 2, 80),
-      randomY = d3.random.normal(height / 2, 80),
-      points = d3.range(n).map(function() { return [randomX(), randomY()]; });
+  var randomX1 = d3.random.normal(width*2 / 5, 80),
+      randomX2 = d3.random.normal(width*3 / 5, 80),
+
+      randomY1 = d3.random.normal(height*3 / 7, 80),
+      randomY2 = d3.random.normal(height*5 / 7, 80),
+
+      points1 = d3.range(Math.round(n/2)).map(function() { return [randomX1(), randomY1()]; }),
+      points2 = d3.range(Math.round(n/2)).map(function() { return [randomX2(), randomY2()]; }),
+
+      points = points1.concat(points2);
 
   var color = d3.scale.linear()
-      .domain([0, 20])
-      .range(["white", "steelblue"])
+      .domain([0, binMax])
+      .range(["white", "black"])
       .interpolate(d3.interpolateLab);
 
   var hexbin = d3.hexbin()
       .size([width, height])
-      .radius(20);
+      .radius(rad);
 
   var x = d3.scale.identity()
       .domain([0, width]);
@@ -176,7 +174,6 @@ function update() {
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis);
-
  
 
   var svg = d3.select("#scatter").append("svg")
