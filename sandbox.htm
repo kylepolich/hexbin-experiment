@@ -43,7 +43,8 @@
   n: total number of pionts;<br />
   rad: radius in hexbin plot;<br />
   binMax: max number of points in hexbin color map;<br />
-  alpah: alpha in scatter plot. <br />
+  alpah: alpha in scatter plot; <br />
+  size: size of dots in scatter plot. <br />
   </p>
   </div>
 
@@ -94,7 +95,7 @@ radSlider = slider('rad', 20, 2, 100);
 binMaxSlider = slider('binMax', 20, 5, 100)
 
 alphaSlider = slider('alpha', .1, .01, .5)
-
+sizeSlider = slider('size', 3, .5, 8)
 
 function update() {
 
@@ -104,7 +105,8 @@ function update() {
   var n = nSlider.noUiSlider.get(),
       rad = radSlider.noUiSlider.get(),
       alpha = alphaSlider.noUiSlider.get()
-      binMax = binMaxSlider.noUiSlider.get();
+      binMax = binMaxSlider.noUiSlider.get()
+      size = sizeSlider.noUiSlider.get();
 
   var randomX1 = d3.random.normal(width*2 / 5, 80),
       randomX2 = d3.random.normal(width*3 / 5, 80),
@@ -193,7 +195,7 @@ function update() {
     .selectAll(".hexagon")
       .data(points)
     .enter().append("circle")
-      .attr("r", 3)
+      .attr("r", size)
       .attr("cx", function(d) {return d[0]})
       .attr("cy", function(d) {return d[1]})
       .style("fill", function(d) { return "rgba(0,0,0," + alpha + ")"; });
