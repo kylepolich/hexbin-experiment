@@ -30,13 +30,26 @@
 
 <script>
 
-var margin = {top: 20, right: 20, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+var size = 500
 
-var randomX = d3.random.normal(width / 2, 80),
-    randomY = d3.random.normal(height / 2, 80),
-    points = d3.range(2000).map(function() { return [randomX(), randomY()]; });
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = size - margin.left - margin.right,
+    height = size - margin.top - margin.bottom;
+
+var mu_x = width / 2
+var stdev_x = 10
+
+var mu_y = width / 2
+var stdev_y = 10
+
+var gaussian = d3.random.normal(0, 1)
+var randomY = d3.random.normal(height / 2, 80)
+var points = d3.range(2000).map(function(i) {
+  var x = (gaussian() * stdev_x + mu_x)
+  var y = (gaussian() * stdev_y + mu_y)
+  y = height - y
+  return [x, y]
+});
 
 dmin=0; dmax=0; rmin=0; rmax=0
 for (p in points) {
@@ -51,7 +64,7 @@ for (p in points) {
 console.log([dmin, dmax, rmin, rmax])
 
 
-var hexbin = false
+var hexbin = true
 var scatter = true
 
 var x = d3.scale.identity()
